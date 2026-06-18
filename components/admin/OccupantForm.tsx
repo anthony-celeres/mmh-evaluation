@@ -26,12 +26,12 @@ export function OccupantForm({
   requirePassword = false,
 }: OccupantFormProps) {
   return (
-    <form action={action} className="grid gap-4">
+    <form action={action} className="grid gap-4 md:grid-cols-2">
       {values?.authUserId ? (
         <input type="hidden" name="auth_user_id" value={values.authUserId} />
       ) : null}
 
-      <div className="grid gap-2">
+      <div className="grid gap-2 md:col-span-1">
         <Label htmlFor="full_name">Full name</Label>
         <Input
           id="full_name"
@@ -42,7 +42,7 @@ export function OccupantForm({
         />
       </div>
 
-      <div className="grid gap-2">
+      <div className="grid gap-2 md:col-span-1">
         <Label htmlFor="email">Email</Label>
         <Input
           id="email"
@@ -54,7 +54,7 @@ export function OccupantForm({
         />
       </div>
 
-      <div className="grid gap-2">
+      <div className="grid gap-2 md:col-span-1">
         <Label htmlFor="password">
           {requirePassword ? "Initial password" : "Password"}
         </Label>
@@ -62,12 +62,12 @@ export function OccupantForm({
           id="password"
           name="password"
           type="password"
-          placeholder={requirePassword ? "Create a temporary password" : "Leave blank to keep the current password"}
+          placeholder={requirePassword ? "Create a temporary password" : "Leave blank to keep current"}
           required={requirePassword}
         />
       </div>
 
-      <div className="grid gap-2">
+      <div className="grid gap-2 md:col-span-1">
         <Label htmlFor="degree_program">Degree program</Label>
         <Input
           id="degree_program"
@@ -78,7 +78,7 @@ export function OccupantForm({
         />
       </div>
 
-      <div className="grid gap-2">
+      <div className="grid gap-2 md:col-span-1">
         <Label htmlFor="year">Year</Label>
         <Input
           id="year"
@@ -91,7 +91,7 @@ export function OccupantForm({
         />
       </div>
 
-      <div className="grid gap-2">
+      <div className="grid gap-2 md:col-span-1">
         <Label htmlFor="room_number">Room number</Label>
         <Input
           id="room_number"
@@ -102,22 +102,13 @@ export function OccupantForm({
         />
       </div>
 
-      <div className="grid gap-2">
-        <Label htmlFor="role">Role</Label>
-        <select
-          id="role"
-          name="role"
-          defaultValue={values?.role ?? "occupant"}
-          className="h-10 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-offset-white focus-visible:ring-2 focus-visible:ring-blue-500"
-        >
-          <option value="occupant">Occupant</option>
-          <option value="admin">Admin</option>
-        </select>
-      </div>
+      {values?.role ? <input type="hidden" name="role" value={values.role} /> : null}
 
-      <Button type="submit" className="w-fit">
-        {submitLabel}
-      </Button>
+      <div className="md:col-span-2 pt-2 flex justify-end">
+        <Button type="submit" className="w-full md:w-fit bg-blue-600 hover:bg-blue-700">
+          {submitLabel}
+        </Button>
+      </div>
     </form>
   );
 }

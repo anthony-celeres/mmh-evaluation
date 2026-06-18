@@ -49,6 +49,12 @@ export default function AdminSidebar({ admin }: AdminSidebarProps) {
         >
           Occupants
         </Link>
+        <Link
+          href="/admin/records"
+          className="flex-1 rounded-lg border border-slate-200 px-4 py-2.5 text-center font-medium text-slate-700 transition-colors hover:bg-slate-50 lg:flex-none lg:text-left"
+        >
+          Records
+        </Link>
       </nav>
 
       <div className="mt-auto hidden pt-8 lg:block">
