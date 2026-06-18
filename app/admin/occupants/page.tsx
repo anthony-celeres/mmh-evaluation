@@ -1,18 +1,18 @@
 import { getAllProfiles } from "@/lib/admin";
 import { OccupantManagerHeader } from "@/components/admin/OccupantManagerHeader";
-import { getEvaluatedOccupantIds } from "@/lib/evaluation-actions";
+import { getAllEvaluations } from "@/lib/evaluation-actions";
 import { OccupantTableWithEvaluation } from "@/components/admin/OccupantTableWithEvaluation";
 
 export default async function OccupantsPage() {
   const users = await getAllProfiles();
-  const evaluatedIds = await getEvaluatedOccupantIds();
+  const evaluations = await getAllEvaluations();
 
   return (
     <div className="space-y-6">
       <OccupantManagerHeader />
 
       <div className="grid gap-6">
-        <OccupantTableWithEvaluation users={users} evaluatedIds={evaluatedIds} />
+        <OccupantTableWithEvaluation users={users} evaluations={evaluations} />
       </div>
     </div>
   );

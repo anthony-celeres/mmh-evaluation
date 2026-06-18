@@ -1,6 +1,10 @@
+"use client";
+
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Eye, EyeOff } from "lucide-react";
 
 type OccupantFormValues = {
   authUserId?: string;
@@ -25,6 +29,8 @@ export function OccupantForm({
   values,
   requirePassword = false,
 }: OccupantFormProps) {
+  const [showPassword, setShowPassword] = useState(false);
+
   return (
     <form action={action} className="grid gap-4 md:grid-cols-2">
       {values?.authUserId ? (
@@ -55,16 +61,24 @@ export function OccupantForm({
       </div>
 
       <div className="grid gap-2 md:col-span-1">
-        <Label htmlFor="password">
-          {requirePassword ? "Initial password" : "Password"}
-        </Label>
-        <Input
-          id="password"
-          name="password"
-          type="password"
-          placeholder={requirePassword ? "Create a temporary password" : "Leave blank to keep current"}
-          required={requirePassword}
-        />
+        <Label htmlFor="password">Password</Label>
+        <div className="relative">
+          <Input
+            id="password"
+            name="password"
+            type={showPassword ? "text" : "password"}
+            placeholder={requirePassword ? "Create occupant's password" : "Leave blank to keep current"}
+            required={requirePassword}
+            className="pr-10"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+          >
+            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+          </button>
+        </div>
       </div>
 
       <div className="grid gap-2 md:col-span-1">

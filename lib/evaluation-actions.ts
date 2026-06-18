@@ -27,25 +27,48 @@ export async function addEvaluation(formData: FormData) {
     const first_sem = formData.get("first_sem") as string;
     const second_sem = (evaluator_points + record_points).toString();
 
-    console.log("Attempting to insert evaluation for:", occupant_id);
+    console.log("Attempting to upsert evaluation for:", occupant_id);
 
-    const { data, error } = await supabase
+    // Use upsert to handle both insert and update based on occupant_id
+    // Note: This requires a unique constraint on occupant_id for upsert by occupant_id
+    // If no unique constraint exists, we can still use upsert if we provide the ID, 
+    // but here we might want to ensure one per user.
+    
+    // First, check if one exists
+    const { data: existing } = await supabase
       .from("occupant_evaluations")
-      .insert({
-        occupant_id,
-        evaluator_points,
-        record_points,
-        second_sem,
-        first_sem,
-        record_details: "",
-        records: "",
-        evaluators: [], // This matches text[] default '{}'
-      })
-      .select();
+      .select("id")
+      .eq("occupant_id", occupant_id)
+      .single();
 
-    if (error) {
-      console.error("Supabase Error Details:", error);
-      throw new Error(error.message);
+    const evaluationData = {
+      occupant_id,
+      evaluator_points,
+      record_points,
+      second_sem,
+      first_sem,
+      record_details: "",
+      records: "",
+      evaluators: [],
+    };
+
+    let result;
+    if (existing) {
+      result = await supabase
+        .from("occupant_evaluations")
+        .update(evaluationData)
+        .eq("id", existing.id)
+        .select();
+    } else {
+      result = await supabase
+        .from("occupant_evaluations")
+        .insert(evaluationData)
+        .select();
+    }
+
+    if (result.error) {
+      console.error("Supabase Error Details:", result.error);
+      throw new Error(result.error.message);
     }
 
     revalidatePath("/admin/occupants");
