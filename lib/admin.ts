@@ -38,7 +38,10 @@ export async function getCurrentUserProfile() {
     }
 
     return profile as AdminUserRow;
-  } catch (error) {
+  } catch (error: any) {
+    if (error && (error.digest === 'DYNAMIC_SERVER_USAGE' || error.message?.includes('Dynamic server usage') || error.name === 'DynamicServerError')) {
+      throw error;
+    }
     console.error("getCurrentUserProfile failed:", error);
     return null;
   }
