@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { createAdminClient } from "@/utils/supabase/admin";
 import { requireAdminUser } from "@/lib/admin";
+import { ensureOccupantEvaluationExists } from "@/lib/evaluation-actions";
 
 function parseYear(value: FormDataEntryValue | null) {
   const parsed = Number(value);
@@ -60,6 +61,8 @@ export async function createOccupant(formData: FormData) {
 
   if (profileError) {
     console.log(profileError);
+  } else if (role === "occupant") {
+    await ensureOccupantEvaluationExists(data.user.id);
   }
 
   revalidatePath("/admin");
@@ -130,6 +133,8 @@ export async function updateOccupant(formData: FormData) {
 
   if (profileError) {
     console.log(profileError);
+  } else if (role === "occupant") {
+    await ensureOccupantEvaluationExists(authUserId);
   }
 
   revalidatePath("/admin");

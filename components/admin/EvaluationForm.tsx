@@ -16,9 +16,10 @@ type EvaluationFormProps = {
     first_sem: string;
     second_sem: string;
   } | null;
+  onSuccess?: () => void;
 };
 
-export function EvaluationForm({ occupantId, occupantName, existingEvaluation }: EvaluationFormProps) {
+export function EvaluationForm({ occupantId, occupantName, existingEvaluation, onSuccess }: EvaluationFormProps) {
   const [isEditing, setIsEditing] = useState(!existingEvaluation);
 
   if (!isEditing && existingEvaluation) {
@@ -74,6 +75,7 @@ export function EvaluationForm({ occupantId, occupantName, existingEvaluation }:
     <form action={async (formData) => {
       await addEvaluation(formData);
       setIsEditing(false);
+      if (onSuccess) onSuccess();
     }} className="space-y-4">
       <input type="hidden" name="occupant_id" value={occupantId} />
       

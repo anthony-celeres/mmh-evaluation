@@ -1,32 +1,67 @@
 import { getAllEvaluations } from "@/lib/evaluation-actions";
+import { getAllProfiles } from "@/lib/admin";
 import { RecordsTable } from "@/components/admin/RecordsTable";
 
 export default async function AdminRecordsPage() {
-  const evaluations = await getAllEvaluations();
+  const [profiles, evaluations] = await Promise.all([
+    getAllProfiles(),
+    getAllEvaluations()
+  ]);
 
-  // Process data for the table
-  const processedRecords = evaluations.map((item: any) => {
-    const secondSemPoints = parseFloat(item.second_sem) || 0;
-    const firstSemPoints = parseFloat(item.first_sem) || 0;
-    
-    // Final = (2nd Sem * 0.6) + (1st Sem * 0.4)
-    const finalScore = (secondSemPoints * 0.6) + (firstSemPoints * 0.4);
-    
-    return {
-      ...item,
-      secondSemPoints,
-      firstSemPoints,
-      finalScore,
-      remarks: finalScore < 70 ? "Failed" : "Passed"
+  // Filter out admin users
+  const occupants = profiles.filter((p: any) => p.role !== 'admin');
+
+  // Process data for each occupant
+  const processedRecords = occupants.map((profile: any) => {
+    const evaluation = evaluations.find((e: any) => e.occupant_id === profile.auth_user_id);
+
+    const occupantObj = {
+      auth_user_id: profile.auth_user_id,
+      full_name: profile.full_name,
+      room_number: profile.room_number,
+      degree_program: profile.degree_program,
+      year: profile.year,
     };
+
+    if (evaluation && evaluation.first_sem && evaluation.second_sem) {
+      const secondSemPoints = parseFloat(evaluation.second_sem) || 0;
+      const firstSemPoints = parseFloat(evaluation.first_sem) || 0;
+      const finalScore = (secondSemPoints * 0.6) + (firstSemPoints * 0.4);
+      
+      return {
+        id: evaluation.id,
+        occupant: occupantObj,
+        evaluator_points: evaluation.evaluator_points,
+        record_points: evaluation.record_points,
+        secondSemPoints,
+        firstSemPoints,
+        finalScore,
+        remarks: finalScore < 70 ? "Failed" : "Passed"
+      };
+    } else {
+      return {
+        id: profile.auth_user_id, // unique key
+        occupant: occupantObj,
+        evaluator_points: null,
+        record_points: null,
+        secondSemPoints: null,
+        firstSemPoints: null,
+        finalScore: null,
+        remarks: null
+      };
+    }
   });
 
-  // Sort by final score descending to calculate rank
-  const sortedRecords = [...processedRecords].sort((a, b) => b.finalScore - a.finalScore);
-  
+  // Calculate ranks only for evaluated occupants
+  const evaluatedRecords = processedRecords.filter((r) => r.finalScore !== null);
+  const sortedEvaluated = [...evaluatedRecords].sort((a, b) => (b.finalScore ?? 0) - (a.finalScore ?? 0));
+
   const finalData = processedRecords.map((item) => {
-    const rank = sortedRecords.findIndex(r => r.id === item.id) + 1;
-    return { ...item, rank };
+    if (item.finalScore !== null) {
+      const rank = sortedEvaluated.findIndex(r => r.id === item.id) + 1;
+      return { ...item, rank };
+    }
+    return { ...item, rank: null };
   });
 
   return (
@@ -39,11 +74,11 @@ export default async function AdminRecordsPage() {
           Evaluation Records
         </h1>
         <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
-          View all occupant evaluations, final grades, and rankings across semesters.
+          View all occupant evaluations, final grades, and rankings across semesters. Click any row to evaluate.
         </p>
       </section>
 
-      <RecordsTable data={finalData} />
+      <RecordsTable data={finalData} evaluations={evaluations} />
     </div>
   );
 }

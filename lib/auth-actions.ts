@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { getCurrentUserProfile } from "@/lib/admin";
 import { createClient } from "@/utils/supabase/server";
+import { ensureOccupantEvaluationExists } from "@/lib/evaluation-actions";
 
 export async function login(prevState: any, formData: FormData) {
   const supabase = createClient();
@@ -45,6 +46,8 @@ export async function login(prevState: any, formData: FormData) {
 
     if (profileError) {
       console.log(profileError);
+    } else if (profile.role === "occupant") {
+      await ensureOccupantEvaluationExists(user.id);
     }
   }
 

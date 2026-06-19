@@ -1,20 +1,27 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/utils/supabase/admin";
 import { revalidatePath } from "next/cache";
 
 export async function getEvaluatedOccupantIds() {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("occupant_evaluations")
-    .select("occupant_id");
+    .select("occupant_id, first_sem, second_sem");
 
   if (error) {
     console.error("Error fetching evaluated occupant IDs:", error);
     return new Set<string>();
   }
 
-  return new Set(data.map(item => item.occupant_id));
+  const completedIds = new Set<string>();
+  for (const item of data) {
+    if (item.first_sem && item.second_sem) {
+      completedIds.add(item.occupant_id);
+    }
+  }
+  return completedIds;
 }
 
 export async function addEvaluation(formData: FormData) {
@@ -47,9 +54,6 @@ export async function addEvaluation(formData: FormData) {
       record_points,
       second_sem,
       first_sem,
-      record_details: "",
-      records: "",
-      evaluators: [],
     };
 
     let result;
@@ -150,4 +154,37 @@ export async function getEvaluationsByOccupantId(occupantId: string) {
     const rank = sorted.findIndex(r => r.final <= final) + 1; // Simplistic rank
     return { ...item, rank };
   });
+}
+
+export async function ensureOccupantEvaluationExists(authUserId: string) {
+  const admin = createAdminClient();
+  
+  // Check if it already exists
+  const { data: existing, error } = await admin
+    .from("occupant_evaluations")
+    .select("id")
+    .eq("occupant_id", authUserId)
+    .maybeSingle();
+    
+  if (error) {
+    console.error("Error checking existing evaluation:", error);
+    return;
+  }
+  
+  if (!existing) {
+    // Insert a default empty evaluation
+    const { error: insertError } = await admin
+      .from("occupant_evaluations")
+      .insert({
+        occupant_id: authUserId,
+        first_sem: null,
+        second_sem: null,
+        evaluator_points: null,
+        record_points: null
+      });
+      
+    if (insertError) {
+      console.error("Error creating default evaluation:", insertError);
+    }
+  }
 }
