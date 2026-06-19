@@ -5,7 +5,7 @@ import { LoginForm } from './components/LoginForm'
 
 const LoginPage = () => {
   return (
-    <div className="flex min-h-dvh flex-col justify-start pt-10 sm:justify-center sm:pt-0 bg-background px-4 pb-10">
+    <div className="flex min-h-dvh flex-col justify-center items-center bg-background px-4 py-8">
       <div className="w-full max-w-sm space-y-4 mx-auto">
         <Link
           href="/"

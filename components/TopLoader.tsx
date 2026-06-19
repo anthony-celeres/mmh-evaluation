@@ -33,21 +33,16 @@ export default function TopLoader() {
       }, 300);
     };
 
-    // Listen for click events on links/forms to detect navigation start
+    // Listen for click events on links to detect navigation start
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       const anchor = target.closest("a");
-      const isFormSubmit = target.closest("form") && (target as HTMLButtonElement).type === "submit";
 
       if (anchor && anchor.href && !anchor.href.startsWith("#") && !anchor.target) {
         const url = new URL(anchor.href, window.location.origin);
         if (url.origin === window.location.origin && url.pathname !== pathname) {
           handleStart();
         }
-      }
-
-      if (isFormSubmit) {
-        handleStart();
       }
     };
 

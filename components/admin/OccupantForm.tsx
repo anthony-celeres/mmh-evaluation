@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 type OccupantFormValues = {
@@ -33,14 +33,32 @@ export function OccupantForm({
   onCancel,
 }: OccupantFormProps) {
   const [showPassword, setShowPassword] = useState(false);
+  const [isPending, setIsPending] = useState(false);
   const router = useRouter();
 
   const handleCancel = onCancel || (() => {
     router.push("/admin/occupants");
   });
 
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsPending(true);
+    const formData = new FormData(e.currentTarget);
+    try {
+      await action(formData);
+    } catch (err) {
+      // Ignore Next.js redirect exceptions
+    } finally {
+      if (window.location.pathname === "/admin/occupants") {
+        window.location.reload();
+      } else {
+        setIsPending(false);
+      }
+    }
+  };
+
   return (
-    <form action={action} className="grid gap-4 md:grid-cols-2">
+    <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
       {values?.authUserId ? (
         <input type="hidden" name="auth_user_id" value={values.authUserId} />
       ) : null}
@@ -132,11 +150,19 @@ export function OccupantForm({
           variant="destructive" 
           onClick={handleCancel}
           className="w-full sm:w-fit font-semibold"
+          disabled={isPending}
         >
           Cancel
         </Button>
-        <Button type="submit" className="w-full sm:w-fit font-semibold">
-          {submitLabel}
+        <Button type="submit" className="w-full sm:w-fit font-semibold" disabled={isPending}>
+          {isPending ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Processing...
+            </>
+          ) : (
+            submitLabel
+          )}
         </Button>
       </div>
     </form>

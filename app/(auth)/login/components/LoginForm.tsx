@@ -1,6 +1,7 @@
-"use client"
+"use client";
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useFormState } from "react-dom"
 import Image from "next/image"
 
 import { Button } from "@/components/ui/button"
@@ -19,7 +20,14 @@ import InteractiveLogo from "@/components/InteractiveLogo"
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
+  const [state, formAction] = useFormState(login, null)
   const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    if (state?.error) {
+      setIsLoading(false)
+    }
+  }, [state])
 
   return (
     <Card className="mx-auto w-full max-w-sm border-border bg-card shadow-lg">
@@ -32,10 +40,15 @@ export function LoginForm() {
       </CardHeader>
       <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
         <form
-          action={login}
+          action={formAction}
           onSubmit={() => setIsLoading(true)}
         >
             <div className="grid gap-4">
+              {state?.error && (
+                <div className="rounded-lg bg-destructive/10 p-3 text-xs font-semibold text-destructive border border-destructive/20 text-center animate-in fade-in slide-in-from-top-1 duration-200">
+                  {state.error}
+                </div>
+              )}
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
