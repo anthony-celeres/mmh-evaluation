@@ -46,8 +46,11 @@ export function OccupantForm({
     const formData = new FormData(e.currentTarget);
     try {
       await action(formData);
-    } catch (err) {
-      // Ignore Next.js redirect exceptions
+    } catch (err: any) {
+      const isRedirect = err.message?.includes("NEXT_REDIRECT") || err.digest?.includes("NEXT_REDIRECT");
+      if (isRedirect) {
+        throw err;
+      }
     } finally {
       if (window.location.pathname === "/admin/occupants") {
         window.location.reload();

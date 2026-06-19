@@ -17,26 +17,31 @@ export type AdminUserRow = {
 };
 
 export async function getCurrentUserProfile() {
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  try {
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-  if (!user) {
+    if (!user) {
+      return null;
+    }
+
+    const { data: profile, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq("auth_user_id", user.id)
+      .maybeSingle();
+
+    if (error || !profile) {
+      return null;
+    }
+
+    return profile as AdminUserRow;
+  } catch (error) {
+    console.error("getCurrentUserProfile failed:", error);
     return null;
   }
-
-  const { data: profile, error } = await supabase
-    .from("users")
-    .select("*")
-    .eq("auth_user_id", user.id)
-    .maybeSingle();
-
-  if (error || !profile) {
-    return null;
-  }
-
-  return profile as AdminUserRow;
 }
 
 export async function requireAdminUser() {
