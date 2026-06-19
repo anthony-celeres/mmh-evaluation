@@ -210,7 +210,17 @@ export default async function Home() {
             {/* Decorative background elements */}
             <div className="absolute inset-0 -z-10">
               <div className="absolute inset-0 bg-gradient-to-tr from-background via-background/98 to-primary/5" />
-              <div className="absolute inset-0 bg-[radial-gradient(hsl(var(--muted-foreground)/0.15)_1px,transparent_1px)] [background-size:20px_20px] opacity-70" />
+              <div 
+                className="absolute inset-0"
+                style={{
+                  backgroundImage: `
+                    linear-gradient(to right, hsla(var(--foreground) / 0.08) 1px, transparent 1px),
+                    linear-gradient(to bottom, hsla(var(--foreground) / 0.08) 1px, transparent 1px),
+                    radial-gradient(circle at 1px 1px, hsla(var(--foreground) / 0.18) 1.5px, transparent 0)
+                  `,
+                  backgroundSize: '24px 24px'
+                }}
+              />
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
               <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-accent/5 rounded-full blur-3xl pointer-events-none" />
             </div>
