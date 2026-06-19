@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 type OccupantFormValues = {
   authUserId?: string;
@@ -21,6 +22,7 @@ type OccupantFormProps = {
   submitLabel: string;
   values?: OccupantFormValues;
   requirePassword?: boolean;
+  onCancel?: () => void;
 };
 
 export function OccupantForm({
@@ -28,8 +30,14 @@ export function OccupantForm({
   submitLabel,
   values,
   requirePassword = false,
+  onCancel,
 }: OccupantFormProps) {
   const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
+
+  const handleCancel = onCancel || (() => {
+    router.push("/admin/occupants");
+  });
 
   return (
     <form action={action} className="grid gap-4 md:grid-cols-2">
@@ -74,7 +82,7 @@ export function OccupantForm({
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
           >
             {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
           </button>
@@ -118,8 +126,16 @@ export function OccupantForm({
 
       {values?.role ? <input type="hidden" name="role" value={values.role} /> : null}
 
-      <div className="md:col-span-2 pt-2 flex justify-end">
-        <Button type="submit" className="w-full md:w-fit bg-blue-600 hover:bg-blue-700">
+      <div className="md:col-span-2 pt-2 flex flex-col-reverse sm:flex-row justify-end gap-3 w-full">
+        <Button 
+          type="button" 
+          variant="destructive" 
+          onClick={handleCancel}
+          className="w-full sm:w-fit font-semibold"
+        >
+          Cancel
+        </Button>
+        <Button type="submit" className="w-full sm:w-fit font-semibold">
           {submitLabel}
         </Button>
       </div>

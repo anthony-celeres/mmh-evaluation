@@ -11,38 +11,45 @@ export function OccupantManagerHeader() {
 
   return (
     <div className="space-y-6">
-      <section className="relative rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="relative rounded-2xl border border-border bg-card p-6 shadow-sm">
         <div className="flex justify-between items-start">
           <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-blue-600">
+            <p className="text-xs font-bold uppercase tracking-wider text-accent">
               Occupant Manager
             </p>
-            <h1 className="mt-1 text-2xl font-bold text-slate-900 md:text-3xl">
+            <h1 className="mt-1 text-2xl font-bold text-foreground md:text-3xl">
               Manage authenticated users
             </h1>
           </div>
-          <Button 
-            onClick={() => setIsOpen(!isOpen)}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            {isOpen ? "Cancel" : "Add Occupant"}
-          </Button>
+          {!isOpen && (
+            <Button 
+              onClick={() => setIsOpen(true)}
+              className="font-semibold"
+            >
+              Add Occupant
+            </Button>
+          )}
         </div>
-        <p className="mt-2 max-w-3xl text-sm text-slate-500">
+        <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
           Create, edit, and remove occupant accounts. Every change updates the Supabase Auth user and the public.users profile record.
         </p>
       </section>
 
       {isOpen && (
-        <Card className="border-slate-200 bg-white shadow-sm animate-in fade-in slide-in-from-top-4 duration-300">
+        <Card className="border-border bg-card shadow-sm animate-in fade-in slide-in-from-top-4 duration-300">
           <CardHeader>
-            <CardTitle className="text-lg font-bold text-slate-900">Add occupant</CardTitle>
-            <CardDescription className="text-sm text-slate-500">
+            <CardTitle className="text-lg font-bold text-foreground">Add occupant</CardTitle>
+            <CardDescription className="text-sm text-muted-foreground">
               Create an authenticated account and store the profile in the database.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <OccupantForm action={createOccupant} submitLabel="Create occupant" requirePassword />
+            <OccupantForm 
+              action={createOccupant} 
+              submitLabel="Create occupant" 
+              requirePassword 
+              onCancel={() => setIsOpen(false)}
+            />
           </CardContent>
         </Card>
       )}

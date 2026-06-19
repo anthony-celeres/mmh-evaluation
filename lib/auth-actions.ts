@@ -60,38 +60,6 @@ export async function login(formData: FormData) {
   redirect("/");
 }
 
-export async function signup(formData: FormData) {
-  const supabase = createClient();
-
-  const fullName = formData.get("full-name") as string;
-  const degreeProgram = formData.get("degree-program") as string;
-  const year = formData.get("year") as string;
-  const roomNumber = formData.get("room-number") as string;
-  const data = {
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
-    options: {
-      data: {
-        full_name: fullName,
-        email: formData.get("email") as string,
-        degree_program: degreeProgram,
-        year,
-        room_number: roomNumber,
-        role: "occupant",
-      },
-    },
-  };
-
-  const { error } = await supabase.auth.signUp(data);
-
-  if (error) {
-    redirect("/error");
-  }
-
-  revalidatePath("/", "layout");
-  redirect("/");
-}
-
 export async function signout() {
   const supabase = createClient();
   const { error } = await supabase.auth.signOut();
@@ -101,24 +69,4 @@ export async function signout() {
   }
 
   redirect("/logout");
-}
-
-export async function signInWithGoogle() {
-  const supabase = createClient();
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      queryParams: {
-        access_type: "offline",
-        prompt: "consent",
-      },
-    },
-  });
-
-  if (error) {
-    console.log(error);
-    redirect("/error");
-  }
-
-  redirect(data.url);
 }

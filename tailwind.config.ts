@@ -67,10 +67,31 @@ const config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "fade-in": {
+          from: { opacity: "0", transform: "translateY(8px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "logo-pop": {
+          "0%": { transform: "scale(1)" },
+          "30%": { transform: "scale(0.8)" },
+          "60%": { transform: "scale(1.2)" },
+          "80%": { transform: "scale(0.95)" },
+          "100%": { transform: "scale(1)" },
+        },
+        "bubble-pop": {
+          "0%": { opacity: "0", transform: "scale(0.8) translateY(4px)" },
+          "15%": { opacity: "1", transform: "scale(1.05) translateY(-2px)" },
+          "30%": { transform: "scale(0.98) translateY(0)" },
+          "85%": { opacity: "1", transform: "scale(1) translateY(0)" },
+          "100%": { opacity: "0", transform: "scale(0.9) translateY(-4px)" }
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "fade-in": "fade-in 0.5s ease-out",
+        "logo-pop": "logo-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+        "bubble-pop": "bubble-pop 1.8s ease-in-out forwards",
       },
     },
   },

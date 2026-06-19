@@ -11,7 +11,7 @@ export default async function AdminLayout({
   const admin = await requireAdminUser();
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 lg:grid lg:grid-cols-[280px_1fr]">
+    <div className="min-h-screen bg-background text-foreground lg:grid lg:grid-cols-[280px_1fr]">
       <AdminSidebar admin={admin} />
       <main className="min-w-0 p-4 md:p-6 lg:p-10">{children}</main>
     </div>

@@ -31,14 +31,14 @@ export default async function AdminRecordsPage() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <p className="text-xs font-bold uppercase tracking-wider text-blue-600">
+      <section className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+        <p className="text-xs font-bold uppercase tracking-wider text-accent">
           Reports
         </p>
-        <h1 className="mt-1 text-2xl font-bold text-slate-900 md:text-3xl">
+        <h1 className="mt-1 text-2xl font-bold text-foreground md:text-3xl">
           Evaluation Records
         </h1>
-        <p className="mt-2 max-w-3xl text-sm text-slate-500">
+        <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
           View all occupant evaluations, final grades, and rankings across semesters.
         </p>
       </section>

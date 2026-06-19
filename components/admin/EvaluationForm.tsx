@@ -25,44 +25,44 @@ export function EvaluationForm({ occupantId, occupantName, existingEvaluation }:
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <span className="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-bold uppercase text-green-700">
+          <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase text-primary">
             Completed
           </span>
           <Button 
             variant="outline" 
             size="sm" 
             onClick={() => setIsEditing(true)}
-            className="h-8 text-xs"
+            className="h-8 text-xs border-border"
           >
             Edit Record
           </Button>
         </div>
 
-        <div className="grid gap-4 rounded-lg border border-slate-100 bg-slate-50/50 p-4">
+        <div className="grid gap-4 rounded-lg border border-border bg-muted/30 p-4">
           <div className="grid gap-1">
-            <Label className="text-[10px] uppercase tracking-wider text-slate-500">Occupant</Label>
-            <p className="text-sm font-medium text-slate-900">{occupantName}</p>
+            <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Occupant</Label>
+            <p className="text-sm font-medium text-foreground">{occupantName}</p>
           </div>
           
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-1">
-              <Label className="text-[10px] uppercase tracking-wider text-slate-500">Evaluator Points</Label>
-              <p className="text-sm font-bold text-slate-900">{existingEvaluation.evaluator_points}</p>
+              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Evaluator Points</Label>
+              <p className="text-sm font-bold text-foreground">{existingEvaluation.evaluator_points}</p>
             </div>
             <div className="grid gap-1">
-              <Label className="text-[10px] uppercase tracking-wider text-slate-500">Record Points</Label>
-              <p className="text-sm font-bold text-slate-900">{existingEvaluation.record_points}</p>
+              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Record Points</Label>
+              <p className="text-sm font-bold text-foreground">{existingEvaluation.record_points}</p>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-1">
-              <Label className="text-[10px] uppercase tracking-wider text-slate-500">1st Sem Points</Label>
-              <p className="text-sm font-bold text-slate-900">{existingEvaluation.first_sem}</p>
+              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">1st Sem Points</Label>
+              <p className="text-sm font-bold text-foreground">{existingEvaluation.first_sem}</p>
             </div>
             <div className="grid gap-1">
-              <Label className="text-[10px] uppercase tracking-wider text-slate-500">2nd Sem Total</Label>
-              <p className="text-sm font-bold text-blue-600">{existingEvaluation.second_sem}</p>
+              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">2nd Sem Total</Label>
+              <p className="text-sm font-black text-primary">{existingEvaluation.second_sem}</p>
             </div>
           </div>
         </div>
@@ -79,7 +79,7 @@ export function EvaluationForm({ occupantId, occupantName, existingEvaluation }:
       
       <div className="grid gap-2">
         <Label>Occupant</Label>
-        <Input value={occupantName} disabled className="bg-slate-50" />
+        <Input value={occupantName} disabled className="bg-muted" />
       </div>
 
       <div className="grid gap-2">
@@ -133,7 +133,7 @@ export function EvaluationForm({ occupantId, occupantName, existingEvaluation }:
             Cancel
           </Button>
         )}
-        <Button type="submit" className={`flex-1 ${existingEvaluation ? 'bg-amber-600 hover:bg-amber-700' : 'bg-blue-600 hover:bg-blue-700'}`}>
+        <Button type="submit" className={`flex-1 ${existingEvaluation ? 'bg-accent hover:bg-accent/90 text-accent-foreground font-semibold' : 'bg-primary hover:bg-primary/90 text-primary-foreground font-semibold'}`}>
           {existingEvaluation ? 'Update Evaluation' : 'Submit Evaluation'}
         </Button>
       </div>
