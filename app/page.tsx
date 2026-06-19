@@ -208,10 +208,11 @@ export default async function Home() {
           {/* Hero Section */}
           <section className="relative overflow-hidden flex-1 flex flex-col justify-center py-8">
             {/* Decorative background elements */}
-            <div className="absolute inset-0 -z-10 bg-[radial-gradient(hsl(var(--muted-foreground)/0.12)_1px,transparent_1px)] [background-size:20px_20px]">
-              <div className="absolute inset-0 bg-gradient-to-tr from-background via-background/95 to-primary/5" />
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-primary/5 rounded-full blur-3xl" />
-              <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-accent/5 rounded-full blur-3xl" />
+            <div className="absolute inset-0 -z-10">
+              <div className="absolute inset-0 bg-gradient-to-tr from-background via-background/98 to-primary/5" />
+              <div className="absolute inset-0 bg-[radial-gradient(hsl(var(--muted-foreground)/0.15)_1px,transparent_1px)] [background-size:20px_20px] opacity-70" />
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-accent/5 rounded-full blur-3xl pointer-events-none" />
             </div>
 
             <div className="mx-auto max-w-5xl px-4 pt-16 pb-20 md:pt-24 md:pb-28 lg:pt-32 lg:pb-36">
