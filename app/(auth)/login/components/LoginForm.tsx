@@ -23,14 +23,14 @@ export function LoginForm() {
 
   return (
     <Card className="mx-auto w-full max-w-sm border-border bg-card shadow-lg">
-      <CardHeader className="space-y-1 flex flex-col items-center">
-        <InteractiveLogo width={80} height={80} className="mb-2 h-20 w-20 hover:scale-105 transition-transform duration-300" enableBubble />
+      <CardHeader className="space-y-1 flex flex-col items-center p-4 pb-2 sm:p-6">
+        <InteractiveLogo width={80} height={80} className="mb-2 h-14 w-14 sm:h-20 sm:w-20 hover:scale-105 transition-transform duration-300" enableBubble />
         <CardTitle className="text-2xl font-bold text-foreground">Login</CardTitle>
         <CardDescription className="text-muted-foreground text-center">
           Enter your email below to login to your account
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
         <form
           action={login}
           onSubmit={() => setIsLoading(true)}
