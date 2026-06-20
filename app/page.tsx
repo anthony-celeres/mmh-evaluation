@@ -167,6 +167,69 @@ export default async function Home() {
               )}
             </section>
 
+            {/* Record Breakdown Section */}
+            <section id="breakdown" className="space-y-3 md:space-y-4 scroll-mt-20">
+              <h3 className="text-xl md:text-2xl font-bold text-foreground">Record Breakdown</h3>
+              <Card className="border-border bg-card shadow-sm overflow-hidden">
+                <CardContent className="p-5 md:p-6">
+                  <p className="text-xs text-muted-foreground mb-4">
+                    This breakdown shows how the evaluation points are categorized. The recorded points are the summarized/averaged data from these components.
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Evaluators Breakdown */}
+                    <div className="rounded-lg border border-border bg-muted/30 p-4">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-accent mb-3">Evaluators (35 points)</h4>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-muted-foreground">Roommates</span>
+                          <span className="font-bold text-foreground">10%</span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-muted-foreground">Advisers</span>
+                          <span className="font-bold text-foreground">40%</span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-muted-foreground">Evaluators</span>
+                          <span className="font-bold text-foreground">50%</span>
+                        </div>
+                        <div className="mt-2 pt-2 border-t border-border flex items-center justify-between text-xs">
+                          <span className="font-bold text-muted-foreground">Total</span>
+                          <span className="font-black text-foreground">100%</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Records Breakdown */}
+                    <div className="rounded-lg border border-border bg-muted/30 p-4">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-accent mb-3">Records (65 points)</h4>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-muted-foreground">Cleaning Attendance</span>
+                          <span className="font-bold text-foreground">20 pts</span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-muted-foreground">Participation Attendance</span>
+                          <span className="font-bold text-foreground">15 pts</span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-muted-foreground">Violations</span>
+                          <span className="font-bold text-foreground">20 pts</span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-muted-foreground">Interpersonal</span>
+                          <span className="font-bold text-foreground">10 pts</span>
+                        </div>
+                        <div className="mt-2 pt-2 border-t border-border flex items-center justify-between text-xs">
+                          <span className="font-bold text-muted-foreground">Total</span>
+                          <span className="font-black text-foreground">65 pts</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </section>
+
             {/* Occupant's Info Section */}
             <section id="profile" className="space-y-3 md:space-y-4 scroll-mt-20">
               <h3 className="text-xl md:text-2xl font-bold text-foreground">Occupant&apos;s Info</h3>

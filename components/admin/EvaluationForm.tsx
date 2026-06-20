@@ -93,6 +93,7 @@ export function EvaluationForm({ occupantId, occupantName, existingEvaluation, o
           type="number"
           min="0"
           max="35"
+          step="0.00001"
           defaultValue={existingEvaluation?.evaluator_points}
           placeholder="e.g. 30"
           required
@@ -107,6 +108,7 @@ export function EvaluationForm({ occupantId, occupantName, existingEvaluation, o
           type="number"
           min="0"
           max="65"
+          step="0.00001"
           defaultValue={existingEvaluation?.record_points}
           placeholder="e.g. 60"
           required
@@ -134,6 +136,7 @@ export function EvaluationForm({ occupantId, occupantName, existingEvaluation, o
             id="first_sem"
             name="first_sem"
             type="number"
+            step="0.00001"
             defaultValue={existingEvaluation?.first_sem === "N/A" ? "" : existingEvaluation?.first_sem}
             placeholder="e.g. 85"
             required
