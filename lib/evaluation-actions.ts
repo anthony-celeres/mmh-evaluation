@@ -115,48 +115,65 @@ export async function getAllEvaluations() {
 export async function getEvaluationsByOccupantId(occupantId: string) {
   const supabase = await createClient();
 
-  // Get all recent evaluations to calculate ranking
+  // Get all profiles (to filter out admins and map correctly)
+  const { data: profiles, error: profErr } = await supabase
+    .from("users")
+    .select("*");
+
+  if (profErr) {
+    console.error("Error fetching profiles:", profErr);
+    return [];
+  }
+
+  // Get all occupant evaluations
   const { data: allEvaluations, error: allErr } = await supabase
     .from("occupant_evaluations")
-    .select("id, occupant_id, second_sem, first_sem")
-    .order("created_at", { ascending: false });
+    .select("*");
 
   if (allErr) {
-    console.error("Error fetching all evaluations for rank calculation:", allErr);
+    console.error("Error fetching all evaluations:", allErr);
     return [];
   }
 
-  // Calculate scores for all
-  const scoredData = (allEvaluations || []).map(item => {
-    const s2 = parseFloat(item.second_sem) || 0;
-    const isNA = item.first_sem === "N/A";
-    const s1 = isNA ? 0 : (parseFloat(item.first_sem) || 0);
-    const final = isNA ? s2 : (s2 * 0.6) + (s1 * 0.4);
-    return { id: item.id, final };
-  });
+  const occupants = (profiles || []).filter((p: any) => p.role !== 'admin');
 
-  // Sort all to get ranks
-  const sorted = [...scoredData].sort((a, b) => b.final - a.final);
+  // Process and score all
+  const processed = occupants.map((profile: any) => {
+    const evaluation = (allEvaluations || []).find((e: any) => e.occupant_id === profile.auth_user_id);
+    if (!evaluation) return null;
+
+    const secondSem = parseFloat(evaluation.second_sem) || 0;
+    const isNA = evaluation.first_sem === "N/A";
+    const firstSem = isNA ? null : (parseFloat(evaluation.first_sem) || 0);
+    const hasCompleteEval = evaluation.second_sem && (evaluation.first_sem || isNA);
+
+    if (!hasCompleteEval) return null;
+
+    const finalScore = isNA ? secondSem : (secondSem * 0.6) + ((firstSem ?? 0) * 0.4);
+    return {
+      id: evaluation.id,
+      occupant_id: profile.auth_user_id,
+      finalScore
+    };
+  }).filter(Boolean) as any[];
+
+  // Sort descending to get ranks
+  const sorted = [...processed].sort((a, b) => b.finalScore - a.finalScore);
 
   // Get specific user's evaluations
-  const { data, error } = await supabase
-    .from("occupant_evaluations")
-    .select("*")
-    .eq("occupant_id", occupantId)
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    console.error("Error fetching evaluations:", error);
-    return [];
-  }
+  const userEvaluations = (allEvaluations || []).filter(e => e.occupant_id === occupantId);
 
   // Attach rank to each evaluation
-  return (data || []).map(item => {
-    const s2 = parseFloat(item.second_sem) || 0;
+  return userEvaluations.map(item => {
+    const secondSem = parseFloat(item.second_sem) || 0;
     const isNA = item.first_sem === "N/A";
-    const s1 = isNA ? 0 : (parseFloat(item.first_sem) || 0);
-    const final = isNA ? s2 : (s2 * 0.6) + (s1 * 0.4);
-    const rank = sorted.findIndex(r => r.final <= final) + 1; // Simplistic rank
+    const hasCompleteEval = item.second_sem && (item.first_sem || isNA);
+
+    let rank = null;
+    if (hasCompleteEval) {
+      // Use exact index from sorted list
+      rank = sorted.findIndex(r => r.id === item.id) + 1;
+    }
     return { ...item, rank };
   });
 }
