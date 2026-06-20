@@ -99,7 +99,7 @@ export function RecordsTable({ data, evaluations }: RecordsTableProps) {
   };
 
   const selectedEvaluation = selectedOccupant 
-    ? evaluations.find(e => e.occupant_id === selectedOccupant.auth_user_id && e.first_sem && e.second_sem)
+    ? evaluations.find(e => e.occupant_id === selectedOccupant.auth_user_id && (e.first_sem || e.first_sem === "N/A") && e.second_sem)
     : null;
 
   return (
@@ -110,7 +110,7 @@ export function RecordsTable({ data, evaluations }: RecordsTableProps) {
             <div>
               <CardTitle className="text-lg font-bold text-foreground">Occupant Evaluation List</CardTitle>
               <CardDescription className="text-sm text-muted-foreground">
-                Weighted final grade calculation: 2nd Sem (60%) and 1st Sem (40%). Click any row to evaluate.
+                Weighted final grade: 2nd Sem (60%) + 1st Sem (40%). If 1st Sem is N/A, 2nd Sem = 100%. Click any row to evaluate.
               </CardDescription>
             </div>
             
@@ -246,8 +246,8 @@ export function RecordsTable({ data, evaluations }: RecordsTableProps) {
                       <td className="px-3 py-3 text-center font-bold text-foreground">
                         {record.secondSemPoints !== null && record.secondSemPoints !== undefined ? `${record.secondSemPoints} points` : '-'}
                       </td>
-                      <td className="px-3 py-3 text-center font-semibold text-muted-foreground">
-                        {record.firstSemPoints !== null && record.firstSemPoints !== undefined ? `${record.firstSemPoints} points` : '-'}
+                      <td className={`px-3 py-3 text-center font-semibold ${record.firstSemPoints === null && record.finalScore !== null ? "italic text-muted-foreground/70" : "text-muted-foreground"}`}>
+                        {record.finalScore !== null && record.firstSemPoints === null ? 'N/A' : (record.firstSemPoints !== null && record.firstSemPoints !== undefined ? `${record.firstSemPoints} points` : '-')}
                       </td>
                       <td className="px-3 py-3 text-center">
                         {record.finalScore !== null && record.finalScore !== undefined ? (

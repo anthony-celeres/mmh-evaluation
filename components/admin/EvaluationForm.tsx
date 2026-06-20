@@ -21,6 +21,7 @@ type EvaluationFormProps = {
 
 export function EvaluationForm({ occupantId, occupantName, existingEvaluation, onSuccess }: EvaluationFormProps) {
   const [isEditing, setIsEditing] = useState(!existingEvaluation);
+  const [isFirstSemNA, setIsFirstSemNA] = useState(existingEvaluation?.first_sem === "N/A");
 
   if (!isEditing && existingEvaluation) {
     return (
@@ -59,7 +60,7 @@ export function EvaluationForm({ occupantId, occupantName, existingEvaluation, o
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-1">
               <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">1st Sem Points</Label>
-              <p className="text-sm font-bold text-foreground">{existingEvaluation.first_sem}</p>
+              <p className={`text-sm font-bold ${existingEvaluation.first_sem === "N/A" ? "text-muted-foreground italic" : "text-foreground"}`}>{existingEvaluation.first_sem === "N/A" ? "N/A (2nd Sem only)" : existingEvaluation.first_sem}</p>
             </div>
             <div className="grid gap-1">
               <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">2nd Sem Total</Label>
@@ -114,14 +115,30 @@ export function EvaluationForm({ occupantId, occupantName, existingEvaluation, o
 
       <div className="grid gap-2">
         <Label htmlFor="first_sem">1st Semester Points</Label>
-        <Input
-          id="first_sem"
-          name="first_sem"
-          type="number"
-          defaultValue={existingEvaluation?.first_sem}
-          placeholder="e.g. 85"
-          required
-        />
+        <div className="flex items-center gap-2 mb-1">
+          <input
+            type="checkbox"
+            id="first_sem_na"
+            checked={isFirstSemNA}
+            onChange={(e) => setIsFirstSemNA(e.target.checked)}
+            className="h-4 w-4 rounded border-border text-primary accent-primary cursor-pointer"
+          />
+          <Label htmlFor="first_sem_na" className="text-xs text-muted-foreground cursor-pointer">
+            N/A — Occupant not available during 1st Semester
+          </Label>
+        </div>
+        {isFirstSemNA ? (
+          <input type="hidden" name="first_sem" value="N/A" />
+        ) : (
+          <Input
+            id="first_sem"
+            name="first_sem"
+            type="number"
+            defaultValue={existingEvaluation?.first_sem === "N/A" ? "" : existingEvaluation?.first_sem}
+            placeholder="e.g. 85"
+            required
+          />
+        )}
       </div>
 
       <div className="flex gap-2">

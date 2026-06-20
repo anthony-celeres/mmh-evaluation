@@ -23,10 +23,16 @@ export default async function AdminRecordsPage() {
       year: profile.year,
     };
 
-    if (evaluation && evaluation.first_sem && evaluation.second_sem) {
+    const isFirstSemNA = evaluation?.first_sem === "N/A";
+    const hasCompleteEval = evaluation && evaluation.second_sem && (evaluation.first_sem || isFirstSemNA);
+
+    if (hasCompleteEval) {
       const secondSemPoints = parseFloat(evaluation.second_sem) || 0;
-      const firstSemPoints = parseFloat(evaluation.first_sem) || 0;
-      const finalScore = (secondSemPoints * 0.6) + (firstSemPoints * 0.4);
+      const firstSemPoints = isFirstSemNA ? null : (parseFloat(evaluation.first_sem) || 0);
+      // If 1st sem is N/A, 2nd sem score is 100% of the final score
+      const finalScore = isFirstSemNA
+        ? secondSemPoints
+        : (secondSemPoints * 0.6) + ((firstSemPoints ?? 0) * 0.4);
       
       return {
         id: evaluation.id,

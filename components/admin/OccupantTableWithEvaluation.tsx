@@ -47,7 +47,8 @@ export function OccupantTableWithEvaluation({ users, evaluations }: OccupantTabl
   const evaluatedIds = useMemo(() => {
     const completedIds = new Set<string>();
     for (const e of evaluations) {
-      if (e.first_sem && e.second_sem) {
+      // N/A first_sem means occupant was only available in 2nd sem, which counts as complete
+      if ((e.first_sem || e.first_sem === "N/A") && e.second_sem) {
         completedIds.add(e.occupant_id);
       }
     }
@@ -211,7 +212,7 @@ export function OccupantTableWithEvaluation({ users, evaluations }: OccupantTabl
                             Completed
                           </span>
                         ) : (
-                          <span className="inline-flex rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-bold uppercase text-accent-foreground">
+                          <span className="inline-flex rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-bold uppercase text-accent">
                             Pending
                           </span>
                         )}
@@ -285,7 +286,7 @@ export function OccupantTableWithEvaluation({ users, evaluations }: OccupantTabl
                           Completed
                         </span>
                       ) : (
-                        <span className="inline-flex rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-bold uppercase text-accent-foreground">
+                        <span className="inline-flex rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-bold uppercase text-accent">
                           Pending
                         </span>
                       )}

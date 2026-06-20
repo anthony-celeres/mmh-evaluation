@@ -30,6 +30,16 @@ export async function login(prevState: any, formData: FormData) {
     const metadata = user.user_metadata ?? {};
     const adminSupabase = createAdminClient();
 
+    // Fetch existing profile to preserve the DB-authoritative role.
+    // Never trust user_metadata.role — it can be self-modified by the user.
+    const { data: existingProfile } = await adminSupabase
+      .from("users")
+      .select("role")
+      .eq("auth_user_id", user.id)
+      .maybeSingle();
+
+    const role = existingProfile?.role || "occupant";
+
     const profile = {
       auth_user_id: user.id,
       full_name: (metadata.full_name as string) || user.email || "Unknown",
@@ -37,7 +47,7 @@ export async function login(prevState: any, formData: FormData) {
       degree_program: (metadata.degree_program as string) || "Undeclared",
       year: Number(metadata.year) || 1,
       room_number: (metadata.room_number as string) || null,
-      role: (metadata.role as string) || "occupant",
+      role,
     };
 
     const { error: profileError } = await adminSupabase
@@ -45,8 +55,8 @@ export async function login(prevState: any, formData: FormData) {
       .upsert(profile, { onConflict: "auth_user_id" });
 
     if (profileError) {
-      console.log(profileError);
-    } else if (profile.role === "occupant") {
+      console.error("Profile upsert error:", profileError);
+    } else if (role === "occupant") {
       await ensureOccupantEvaluationExists(user.id);
     }
   }

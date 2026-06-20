@@ -3,6 +3,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { revalidatePath } from "next/cache";
+import { requireAdminUser } from "@/lib/admin";
 
 export async function getEvaluatedOccupantIds() {
   const supabase = await createClient();
@@ -17,7 +18,7 @@ export async function getEvaluatedOccupantIds() {
 
   const completedIds = new Set<string>();
   for (const item of data) {
-    if (item.first_sem && item.second_sem) {
+    if ((item.first_sem || item.first_sem === "N/A") && item.second_sem) {
       completedIds.add(item.occupant_id);
     }
   }
@@ -25,6 +26,7 @@ export async function getEvaluatedOccupantIds() {
 }
 
 export async function addEvaluation(formData: FormData) {
+  await requireAdminUser();
   const supabase = await createClient();
 
   try {
@@ -127,8 +129,10 @@ export async function getEvaluationsByOccupantId(occupantId: string) {
   // Calculate scores for all
   const scoredData = (allEvaluations || []).map(item => {
     const s2 = parseFloat(item.second_sem) || 0;
-    const s1 = parseFloat(item.first_sem) || 0;
-    return { id: item.id, final: (s2 * 0.6) + (s1 * 0.4) };
+    const isNA = item.first_sem === "N/A";
+    const s1 = isNA ? 0 : (parseFloat(item.first_sem) || 0);
+    const final = isNA ? s2 : (s2 * 0.6) + (s1 * 0.4);
+    return { id: item.id, final };
   });
 
   // Sort all to get ranks
@@ -149,8 +153,9 @@ export async function getEvaluationsByOccupantId(occupantId: string) {
   // Attach rank to each evaluation
   return (data || []).map(item => {
     const s2 = parseFloat(item.second_sem) || 0;
-    const s1 = parseFloat(item.first_sem) || 0;
-    const final = (s2 * 0.6) + (s1 * 0.4);
+    const isNA = item.first_sem === "N/A";
+    const s1 = isNA ? 0 : (parseFloat(item.first_sem) || 0);
+    const final = isNA ? s2 : (s2 * 0.6) + (s1 * 0.4);
     const rank = sorted.findIndex(r => r.final <= final) + 1; // Simplistic rank
     return { ...item, rank };
   });

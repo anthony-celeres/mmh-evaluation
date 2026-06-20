@@ -44,28 +44,37 @@ export default async function Home() {
             {evaluations.length > 0 && (
               <section className="flex flex-col items-center justify-center rounded-2xl border border-primary/20 bg-card p-6 md:p-8 shadow-lg shadow-primary/5">
                 <p className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-accent mb-4 md:mb-6">Current Standing</p>
-                <div className="flex items-center justify-center gap-6 md:gap-12">
-                  <div className="flex flex-col items-center">
-                    <div className="flex items-baseline gap-1 md:gap-2">
-                      <span className="text-4xl md:text-6xl font-black text-foreground">#{evaluations[0].rank || 1}</span>
-                      <span className="text-lg md:text-xl font-bold text-muted-foreground">Rank</span>
-                    </div>
-                  </div>
-                  
-                  <div className="h-10 md:h-16 w-px bg-border" />
+                {(() => {
+                  const s2 = parseFloat(evaluations[0].second_sem) || 0;
+                  const isNA = evaluations[0].first_sem === "N/A";
+                  const s1 = isNA ? 0 : (parseFloat(evaluations[0].first_sem) || 0);
+                  const finalScore = isNA ? s2 : (s2 * 0.6) + (s1 * 0.4);
+                  const passed = finalScore >= 70;
+                  return (
+                    <div className="flex items-center justify-center gap-6 md:gap-12 w-full">
+                      {/* Left Column: Rank + Remarks */}
+                      <div className="flex flex-col items-center gap-3 md:gap-4">
+                        <div className="flex items-baseline gap-1 md:gap-2">
+                          <span className="text-4xl md:text-6xl font-black text-foreground">#{evaluations[0].rank || 1}</span>
+                          <span className="text-lg md:text-xl font-bold text-muted-foreground">Rank</span>
+                        </div>
+                        <span className={`inline-flex rounded-full px-3 py-1 text-[10px] md:text-xs font-bold uppercase tracking-wider ${passed ? 'bg-primary/10 text-primary' : 'bg-destructive/10 text-destructive'}`}>
+                          {passed ? 'Passed' : 'Failed'}
+                        </span>
+                      </div>
 
-                  <div className="flex flex-col items-center">
-                    <div className="flex flex-col items-center">
-                      <span className={`text-2xl md:text-4xl font-black ${((parseFloat(evaluations[0].second_sem) || 0) * 0.6 + (parseFloat(evaluations[0].first_sem) || 0) * 0.4) >= 70 ? 'text-primary' : 'text-destructive'}`}>
-                        {((parseFloat(evaluations[0].second_sem) || 0) * 0.6 + (parseFloat(evaluations[0].first_sem) || 0) * 0.4).toFixed(1)} points
-                      </span>
-                      <span className="text-xs md:text-sm font-bold text-muted-foreground uppercase tracking-wider">Final Score</span>
+                      <div className="h-16 md:h-24 w-px bg-border" />
+
+                      {/* Right Column: Final Score */}
+                      <div className="flex flex-col items-center">
+                        <span className={`text-4xl md:text-6xl font-black ${passed ? 'text-primary' : 'text-destructive'}`}>
+                          {finalScore.toFixed(1)}
+                        </span>
+                        <span className="text-xs md:text-sm font-bold text-muted-foreground uppercase tracking-wider mt-1">Final Score</span>
+                      </div>
                     </div>
-                  </div>
-                </div>
-                <p className="mt-6 md:mt-8 text-center text-xs md:text-sm font-medium text-muted-foreground max-w-sm">
-                  Based on your most recent evaluation performance across all residents.
-                </p>
+                  );
+                })()}
               </section>
             )}
 
@@ -89,15 +98,16 @@ export default async function Home() {
                       <tbody className="divide-y divide-border bg-card">
                         {evaluations.map((evaluation) => {
                           const secondSem = parseFloat(evaluation.second_sem) || 0;
-                          const firstSem = parseFloat(evaluation.first_sem) || 0;
-                          const finalScore = (secondSem * 0.6) + (firstSem * 0.4);
+                          const isNA = evaluation.first_sem === "N/A";
+                          const firstSem = isNA ? 0 : (parseFloat(evaluation.first_sem) || 0);
+                          const finalScore = isNA ? secondSem : (secondSem * 0.6) + (firstSem * 0.4);
                           
                           return (
                             <tr key={evaluation.id} className="transition-colors hover:bg-muted/50">
                               <td className="px-4 md:px-6 py-3 md:py-4 text-center text-muted-foreground">{evaluation.evaluator_points ?? 0} points</td>
                               <td className="px-4 md:px-6 py-3 md:py-4 text-center text-muted-foreground">{evaluation.record_points ?? 0} points</td>
                               <td className="px-4 md:px-6 py-3 md:py-4 text-center font-bold text-foreground">{secondSem} points</td>
-                              <td className="px-4 md:px-6 py-3 md:py-4 text-center text-muted-foreground">{firstSem} points</td>
+                              <td className={`px-4 md:px-6 py-3 md:py-4 text-center ${isNA ? "italic text-muted-foreground" : "text-muted-foreground"}`}>{isNA ? "N/A" : `${firstSem} points`}</td>
                               <td className="px-4 md:px-6 py-3 md:py-4 text-center">
                                 <span className={`inline-flex rounded-lg px-2.5 py-1 text-xs md:text-sm font-black ${finalScore >= 70 ? 'bg-primary/10 text-primary' : 'bg-destructive/10 text-destructive'}`}>
                                   {finalScore.toFixed(1)} points
@@ -114,8 +124,9 @@ export default async function Home() {
                   <div className="md:hidden space-y-4">
                     {evaluations.map((evaluation) => {
                       const secondSem = parseFloat(evaluation.second_sem) || 0;
-                      const firstSem = parseFloat(evaluation.first_sem) || 0;
-                      const finalScore = (secondSem * 0.6) + (firstSem * 0.4);
+                      const isNA = evaluation.first_sem === "N/A";
+                      const firstSem = isNA ? 0 : (parseFloat(evaluation.first_sem) || 0);
+                      const finalScore = isNA ? secondSem : (secondSem * 0.6) + (firstSem * 0.4);
                       
                       return (
                         <Card key={evaluation.id} className="border-border bg-card p-5 shadow-sm space-y-4">
@@ -141,7 +152,7 @@ export default async function Home() {
                             </div>
                             <div>
                               <p className="text-muted-foreground font-medium">1st Sem (40%)</p>
-                              <p className="font-semibold text-foreground mt-0.5">{firstSem} points</p>
+                              <p className={`font-semibold mt-0.5 ${isNA ? "italic text-muted-foreground" : "text-foreground"}`}>{isNA ? "N/A" : `${firstSem} points`}</p>
                             </div>
                           </div>
                         </Card>
@@ -246,7 +257,7 @@ export default async function Home() {
 
                 {/* Subtitle */}
                 <p className="mt-5 max-w-lg text-base md:text-lg text-muted-foreground leading-relaxed">
-                  The official Mahogany Men's Hall Evaluation System. Please log in to your account to view your evaluation record.
+                  The official Mahogany Men&apos;s Hall Evaluation System. Please log in to your account to view your evaluation record.
                 </p>
 
                 {/* CTA */}

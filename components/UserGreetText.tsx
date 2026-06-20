@@ -14,7 +14,7 @@ const UserGreetText = () => {
       setUser(user);
     };
     fetchUser();
-  }, []);
+  }, [supabase.auth]);
   if (user !== null) {
     console.log(user);
     return (

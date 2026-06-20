@@ -110,7 +110,7 @@ export default async function AdminPage() {
               🔐 **Security**: Do not share administrator credentials. Accounts are pre-authenticated via Supabase auth, and only admin-provisioned email addresses can sign in.
             </p>
             <p>
-              📊 **Evaluations**: The computation rank formula applies weighted grades. Adding new record entries in "Records" automatically recalibrates ranking tables for the occupants.
+              📊 **Evaluations**: The computation rank formula applies weighted grades. Adding new record entries in &ldquo;Records&rdquo; automatically recalibrates ranking tables for the occupants.
             </p>
           </CardContent>
         </Card>
