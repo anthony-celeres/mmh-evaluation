@@ -113,7 +113,7 @@ export async function getAllEvaluations() {
 }
 
 export async function getEvaluationsByOccupantId(occupantId: string) {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // Get all profiles (to filter out admins and map correctly)
   const { data: profiles, error: profErr } = await supabase
