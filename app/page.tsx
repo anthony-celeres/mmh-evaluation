@@ -49,7 +49,7 @@ export default async function Home() {
             </div>
 
             {/* Ranking Component */}
-            {evaluations.length > 0 && (
+            {evaluations.length > 0 && evaluations[0].rank !== null ? (
               <section className="flex flex-col items-center justify-center rounded-2xl border border-primary/20 bg-card p-6 md:p-8 shadow-lg shadow-primary/5">
                 <p className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-accent mb-4 md:mb-6">Current Standing</p>
                 {(() => {
@@ -57,7 +57,7 @@ export default async function Home() {
                   const isNA = evaluations[0].first_sem === "N/A";
                   const s1 = isNA ? 0 : (parseFloat(evaluations[0].first_sem) || 0);
                   const finalScore = isNA ? s2 : (s2 * 0.6) + (s1 * 0.4);
-                  const rank = evaluations[0].rank || 1;
+                  const rank = evaluations[0].rank;
 
                   let remark: string;
                   if (finalScore < 70) {
@@ -108,12 +108,16 @@ export default async function Home() {
                   );
                 })()}
               </section>
+            ) : (
+              <section className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/40 p-6 md:p-8">
+                <p className="text-xs md:text-sm text-muted-foreground font-semibold">Your evaluation is currently pending finalization by the administrator.</p>
+              </section>
             )}
 
             {/* Evaluation Records Section */}
             <section id="records" className="space-y-3 md:space-y-4 scroll-mt-20">
               <h3 className="text-xl md:text-2xl font-bold text-foreground">Evaluation Record</h3>
-              {evaluations.length > 0 ? (
+              {evaluations.length > 0 && evaluations[0].rank !== null ? (
                 <>
                   {/* Desktop Table View */}
                   <Card className="hidden md:block overflow-hidden border-border bg-card shadow-sm">
