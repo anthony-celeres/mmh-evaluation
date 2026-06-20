@@ -68,7 +68,7 @@ export default async function Home() {
                       {/* Right Column: Final Score */}
                       <div className="flex flex-col items-center">
                         <span className={`text-4xl md:text-6xl font-black ${passed ? 'text-primary' : 'text-destructive'}`}>
-                          {finalScore.toFixed(1)}
+                          {finalScore.toFixed(5)}
                         </span>
                         <span className="text-xs md:text-sm font-bold text-muted-foreground uppercase tracking-wider mt-1">Final Score</span>
                       </div>
@@ -110,7 +110,7 @@ export default async function Home() {
                               <td className={`px-4 md:px-6 py-3 md:py-4 text-center ${isNA ? "italic text-muted-foreground" : "text-muted-foreground"}`}>{isNA ? "N/A" : `${firstSem} points`}</td>
                               <td className="px-4 md:px-6 py-3 md:py-4 text-center">
                                 <span className={`inline-flex rounded-lg px-2.5 py-1 text-xs md:text-sm font-black ${finalScore >= 70 ? 'bg-primary/10 text-primary' : 'bg-destructive/10 text-destructive'}`}>
-                                  {finalScore.toFixed(1)} points
+                                  {finalScore.toFixed(5)} points
                                 </span>
                               </td>
                             </tr>
@@ -133,7 +133,7 @@ export default async function Home() {
                           <div className="flex items-center justify-between border-b pb-2">
                             <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Final Score</span>
                             <span className={`inline-flex rounded-lg px-3 py-1 text-sm font-black ${finalScore >= 70 ? 'bg-primary/10 text-primary' : 'bg-destructive/10 text-destructive'}`}>
-                              {finalScore.toFixed(1)} points
+                              {finalScore.toFixed(5)} points
                             </span>
                           </div>
                           

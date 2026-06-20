@@ -252,7 +252,7 @@ export function RecordsTable({ data, evaluations }: RecordsTableProps) {
                       <td className="px-3 py-3 text-center">
                         {record.finalScore !== null && record.finalScore !== undefined ? (
                           <span className="rounded bg-primary/10 px-2 py-1 font-bold text-primary">
-                            {record.finalScore.toFixed(1)} points
+                            {record.finalScore.toFixed(5)} points
                           </span>
                         ) : '-'}
                       </td>
