@@ -6,8 +6,10 @@ import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import OccupantNavbar from "@/components/OccupantNavbar";
 import { getEvaluationsByOccupantId } from "@/lib/evaluation-actions";
+import { getRetainedLimit } from "@/lib/settings-actions";
 import { ArrowRight } from "lucide-react";
 import InteractiveLogo from "@/components/InteractiveLogo";
+import { cn } from "@/lib/utils";
 
 export default async function Home() {
   const profile = await getCurrentUserProfile();
@@ -17,8 +19,14 @@ export default async function Home() {
   }
 
   let evaluations: any[] = [];
+  let retainedLimit = 47;
   if (profile) {
-    evaluations = await getEvaluationsByOccupantId(profile.auth_user_id);
+    const [evalData, limit] = await Promise.all([
+      getEvaluationsByOccupantId(profile.auth_user_id),
+      getRetainedLimit()
+    ]);
+    evaluations = evalData;
+    retainedLimit = limit;
   }
 
   return (
@@ -49,17 +57,35 @@ export default async function Home() {
                   const isNA = evaluations[0].first_sem === "N/A";
                   const s1 = isNA ? 0 : (parseFloat(evaluations[0].first_sem) || 0);
                   const finalScore = isNA ? s2 : (s2 * 0.6) + (s1 * 0.4);
-                  const passed = finalScore >= 70;
+                  const rank = evaluations[0].rank || 1;
+
+                  let remark: string;
+                  if (finalScore < 70) {
+                    remark = "Failed";
+                  } else if (rank <= retainedLimit) {
+                    remark = "Retained";
+                  } else if (rank <= retainedLimit + 10) {
+                    remark = "Waitlisted";
+                  } else {
+                    remark = "Recommended";
+                  }
+
                   return (
                     <div className="flex items-center justify-center gap-6 md:gap-12 w-full">
                       {/* Left Column: Rank + Remarks */}
                       <div className="flex flex-col items-center gap-3 md:gap-4">
                         <div className="flex items-baseline gap-1 md:gap-2">
-                          <span className="text-4xl md:text-6xl font-black text-foreground">#{evaluations[0].rank || 1}</span>
+                          <span className="text-4xl md:text-6xl font-black text-foreground">#{rank}</span>
                           <span className="text-lg md:text-xl font-bold text-muted-foreground">Rank</span>
                         </div>
-                        <span className={`inline-flex rounded-full px-3 py-1 text-[10px] md:text-xs font-bold uppercase tracking-wider ${passed ? 'bg-primary/10 text-primary' : 'bg-destructive/10 text-destructive'}`}>
-                          {passed ? 'Passed' : 'Failed'}
+                        <span className={cn(
+                          "inline-flex rounded-full px-3 py-1 text-[10px] md:text-xs font-bold uppercase tracking-wider",
+                          remark === 'Retained' && 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+                          remark === 'Waitlisted' && 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+                          remark === 'Recommended' && 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+                          remark === 'Failed' && 'bg-destructive/10 text-destructive'
+                        )}>
+                          {remark}
                         </span>
                       </div>
 
@@ -67,7 +93,13 @@ export default async function Home() {
 
                       {/* Right Column: Final Score */}
                       <div className="flex flex-col items-center">
-                        <span className={`text-4xl md:text-6xl font-black ${passed ? 'text-primary' : 'text-destructive'}`}>
+                        <span className={cn(
+                          "text-4xl md:text-6xl font-black",
+                          remark === 'Retained' && 'text-emerald-500 dark:text-emerald-400',
+                          remark === 'Waitlisted' && 'text-amber-500 dark:text-amber-400',
+                          remark === 'Recommended' && 'text-blue-500 dark:text-blue-400',
+                          remark === 'Failed' && 'text-destructive'
+                        )}>
                           {finalScore.toFixed(5)}
                         </span>
                         <span className="text-xs md:text-sm font-bold text-muted-foreground uppercase tracking-wider mt-1">Final Score</span>

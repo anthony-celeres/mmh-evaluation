@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { signout } from "@/lib/auth-actions";
 import type { AdminUserRow } from "@/lib/admin";
@@ -14,8 +15,16 @@ type AdminSidebarProps = {
 };
 
 export default function AdminSidebar({ admin }: AdminSidebarProps) {
+  const pathname = usePathname();
   const [currentTheme, setCurrentTheme] = useState<"light" | "dark" | "system">("system");
   const [isMounted, setIsMounted] = useState(false);
+
+  const isActive = (href: string) => {
+    if (href === "/admin") {
+      return pathname === "/admin";
+    }
+    return pathname === href || pathname.startsWith(href + "/");
+  };
 
   useEffect(() => {
     setIsMounted(true);
@@ -92,19 +101,34 @@ export default function AdminSidebar({ admin }: AdminSidebarProps) {
       <nav className="mt-6 flex flex-row gap-2 text-sm lg:mt-8 lg:flex-col">
         <Link
           href="/admin"
-          className="flex-1 rounded-lg border border-border px-4 py-2.5 text-center font-bold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground lg:flex-none lg:text-left"
+          className={cn(
+            "flex-1 rounded-lg border px-4 py-2.5 text-center font-bold transition-colors lg:flex-none lg:text-left",
+            isActive("/admin")
+              ? "bg-primary text-primary-foreground border-primary shadow-sm"
+              : "border-border text-muted-foreground hover:bg-muted hover:text-foreground"
+          )}
         >
           Dashboard
         </Link>
         <Link
           href="/admin/occupants"
-          className="flex-1 rounded-lg border border-border px-4 py-2.5 text-center font-bold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground lg:flex-none lg:text-left"
+          className={cn(
+            "flex-1 rounded-lg border px-4 py-2.5 text-center font-bold transition-colors lg:flex-none lg:text-left",
+            isActive("/admin/occupants")
+              ? "bg-primary text-primary-foreground border-primary shadow-sm"
+              : "border-border text-muted-foreground hover:bg-muted hover:text-foreground"
+          )}
         >
           Occupants
         </Link>
         <Link
           href="/admin/records"
-          className="flex-1 rounded-lg border border-border px-4 py-2.5 text-center font-bold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground lg:flex-none lg:text-left"
+          className={cn(
+            "flex-1 rounded-lg border px-4 py-2.5 text-center font-bold transition-colors lg:flex-none lg:text-left",
+            isActive("/admin/records")
+              ? "bg-primary text-primary-foreground border-primary shadow-sm"
+              : "border-border text-muted-foreground hover:bg-muted hover:text-foreground"
+          )}
         >
           Records
         </Link>

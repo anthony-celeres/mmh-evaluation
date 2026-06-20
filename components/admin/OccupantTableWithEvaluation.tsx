@@ -39,6 +39,7 @@ export function OccupantTableWithEvaluation({ users, evaluations }: OccupantTabl
   const [statusFilter, setStatusFilter] = useState<"all" | "completed" | "pending">("all");
   const [yearFilter, setYearFilter] = useState<string>("all");
   const [levelFilter, setLevelFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<"name" | "room">("name");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [selectedOccupantInfo, setSelectedOccupantInfo] = useState<Occupant | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -86,38 +87,50 @@ export function OccupantTableWithEvaluation({ users, evaluations }: OccupantTabl
         return matchesSearch && matchesStatus && matchesYear && matchesLevel;
       })
       .sort((a, b) => {
-        const nameA = a.full_name.toLowerCase();
-        const nameB = b.full_name.toLowerCase();
-        if (sortOrder === "asc") return nameA.localeCompare(nameB);
-        return nameB.localeCompare(nameA);
+        if (sortBy === "room") {
+          const roomA = a.room_number || "";
+          const roomB = b.room_number || "";
+          if (roomA === "" && roomB !== "") return 1;
+          if (roomB === "" && roomA !== "") return -1;
+          const comparison = roomA.localeCompare(roomB, undefined, { numeric: true, sensitivity: 'base' });
+          return sortOrder === "asc" ? comparison : -comparison;
+        } else {
+          const nameA = a.full_name.toLowerCase();
+          const nameB = b.full_name.toLowerCase();
+          const comparison = nameA.localeCompare(nameB);
+          return sortOrder === "asc" ? comparison : -comparison;
+        }
       });
-  }, [users, searchTerm, statusFilter, yearFilter, levelFilter, sortOrder, evaluatedIds]);
+  }, [users, searchTerm, statusFilter, yearFilter, levelFilter, sortBy, sortOrder, evaluatedIds]);
 
   return (
     <div className="space-y-6">
       <Card className="border-border bg-card shadow-sm">
         <CardHeader className="space-y-4">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <CardTitle className="text-xl font-extrabold tracking-tight text-foreground">Occupant Profiles</CardTitle>
-              <CardDescription className="text-xs text-muted-foreground mt-0.5">
-                Manage profiles, view standings, and submit resident evaluations.
-              </CardDescription>
-            </div>
-            
-            <div className="relative w-full md:w-72">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search name, email, or room..."
-                className="pl-9 text-xs h-9 bg-muted/20 border-border"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
+          <div className="flex flex-col gap-2">
+            <CardTitle className="text-xl font-extrabold tracking-tight text-foreground">Occupant Profiles</CardTitle>
+            <CardDescription className="text-xs text-muted-foreground mt-0.5">
+              Manage profiles, view standings, and submit resident evaluations.
+            </CardDescription>
           </div>
 
-          {/* Filter controls row */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border/60">
+          {/* Search and Filters row */}
+          <div className="flex flex-col gap-4 pt-3 border-t border-border/60 lg:flex-row lg:items-end lg:justify-between">
+            {/* Search Bar */}
+            <div className="flex flex-col gap-1 w-full lg:max-w-xs">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Search</span>
+              <div className="relative w-full">
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search name, email, or room..."
+                  className="pl-9 text-xs h-9 bg-muted/20 border-border w-full"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Filter controls row */}
             <div className="flex flex-wrap items-center gap-2">
               {/* Status Filter */}
               <div className="flex flex-col gap-1">
@@ -164,19 +177,25 @@ export function OccupantTableWithEvaluation({ users, evaluations }: OccupantTabl
                   <option value="third">3rd Level</option>
                 </select>
               </div>
-            </div>
 
-            {/* Sorting Button */}
-            <div className="flex items-end h-full pt-4 sm:pt-0">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="h-9 text-xs font-bold border-border"
-                onClick={() => setSortOrder(prev => prev === "asc" ? "desc" : "asc")}
-              >
-                <ArrowUpDown className="mr-2 h-3.5 w-3.5 text-muted-foreground" />
-                Sort A-Z: {sortOrder === "asc" ? "A-Z" : "Z-A"}
-              </Button>
+              {/* Sorting Filter */}
+              <div className="flex flex-col gap-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Sort By</span>
+                <select 
+                  className="h-9 rounded-lg border border-border bg-card px-3 text-xs font-semibold text-foreground outline-none transition-colors hover:bg-muted cursor-pointer"
+                  value={`${sortBy}-${sortOrder}`}
+                  onChange={(e) => {
+                    const [newSortBy, newSortOrder] = e.target.value.split("-");
+                    setSortBy(newSortBy as "name" | "room");
+                    setSortOrder(newSortOrder as "asc" | "desc");
+                  }}
+                >
+                  <option value="name-asc">Name (A-Z)</option>
+                  <option value="name-desc">Name (Z-A)</option>
+                  <option value="room-asc">Room (Low to High)</option>
+                  <option value="room-desc">Room (High to Low)</option>
+                </select>
+              </div>
             </div>
           </div>
         </CardHeader>
