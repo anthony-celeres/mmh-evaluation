@@ -31,10 +31,11 @@ export async function addEvaluation(formData: FormData) {
 
   try {
     const occupant_id = formData.get("occupant_id") as string;
-    const evaluator_points = parseFloat(formData.get("evaluator_points") as string) || 0;
-    const record_points = parseFloat(formData.get("record_points") as string) || 0;
-    const first_sem = formData.get("first_sem") as string;
-    const second_sem = (evaluator_points + record_points).toString();
+    const evaluator_points = parseFloat(parseFloat(formData.get("evaluator_points") as string).toFixed(4)) || 0;
+    const record_points = parseFloat(parseFloat(formData.get("record_points") as string).toFixed(4)) || 0;
+    const first_sem_raw = formData.get("first_sem") as string;
+    const first_sem = first_sem_raw === "N/A" ? "N/A" : (parseFloat(parseFloat(first_sem_raw).toFixed(4)) || 0).toString();
+    const second_sem = parseFloat((evaluator_points + record_points).toFixed(4)).toString();
 
     console.log("Attempting to upsert evaluation for:", occupant_id);
 

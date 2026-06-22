@@ -6,8 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, ArrowUpDown, X } from "lucide-react";
 import { EvaluationForm } from "./EvaluationForm";
-import { cn } from "@/lib/utils";
-import { updateRetainedLimit } from "@/lib/settings-actions";
+import { cn, formatDecimal } from "@/lib/utils";
+import { updateRetainedLimit, updateWaitlistedLimit } from "@/lib/settings-actions";
 
 type Record = {
   id: string;
@@ -31,28 +31,39 @@ type RecordsTableProps = {
   data: Record[];
   evaluations: any[];
   initialRetainedLimit: number;
+  initialWaitlistedLimit: number;
 };
 
-export function RecordsTable({ data, evaluations, initialRetainedLimit }: RecordsTableProps) {
+export function RecordsTable({ data, evaluations, initialRetainedLimit, initialWaitlistedLimit }: RecordsTableProps) {
   const [selectedOccupant, setSelectedOccupant] = useState<{ auth_user_id: string; full_name: string } | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [remarksFilter, setRemarksFilter] = useState<"all" | "Retained" | "Waitlisted" | "Recommended" | "Failed">("all");
   const [yearFilter, setYearFilter] = useState<string>("all");
   const [levelFilter, setLevelFilter] = useState<string>("all");
   const [retainedLimit, setRetainedLimit] = useState<number>(initialRetainedLimit);
-  const [inputValue, setInputValue] = useState<number>(initialRetainedLimit);
+  const [waitlistedLimit, setWaitlistedLimit] = useState<number>(initialWaitlistedLimit);
+  const [retainedInput, setRetainedInput] = useState<number>(initialRetainedLimit);
+  const [waitlistInput, setWaitlistInput] = useState<number>(initialWaitlistedLimit);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [sortConfig, setSortConfig] = useState<{ key: keyof Record | "full_name" | "room_number"; direction: "asc" | "desc" }>({
     key: "rank",
     direction: "asc",
   });
 
-  const handleUpdateLimit = async () => {
+  const handleUpdateSettings = async () => {
     setIsUpdating(true);
-    const finalVal = Math.max(47, inputValue);
-    setInputValue(finalVal);
-    await updateRetainedLimit(finalVal);
-    setRetainedLimit(finalVal);
+    const finalRetained = Math.max(47, retainedInput);
+    const finalWaitlisted = Math.max(0, waitlistInput);
+    setRetainedInput(finalRetained);
+    setWaitlistInput(finalWaitlisted);
+    
+    await Promise.all([
+      updateRetainedLimit(finalRetained),
+      updateWaitlistedLimit(finalWaitlisted)
+    ]);
+    
+    setRetainedLimit(finalRetained);
+    setWaitlistedLimit(finalWaitlisted);
     setIsUpdating(false);
   };
 
@@ -66,14 +77,14 @@ export function RecordsTable({ data, evaluations, initialRetainedLimit }: Record
         remarks = "Failed";
       } else if (item.rank <= retainedLimit) {
         remarks = "Retained";
-      } else if (item.rank <= retainedLimit + 10) {
+      } else if (item.rank <= retainedLimit + waitlistedLimit) {
         remarks = "Waitlisted";
       } else {
         remarks = "Recommended";
       }
       return { ...item, remarks };
     });
-  }, [data, retainedLimit]);
+  }, [data, retainedLimit, waitlistedLimit]);
 
   const filteredAndSortedRecords = useMemo(() => {
     return recordsWithComputedRemarks
@@ -145,33 +156,54 @@ export function RecordsTable({ data, evaluations, initialRetainedLimit }: Record
 
   return (
     <div className="space-y-6">
-      {/* Retained Limit Settings Card */}
-      <Card className="border-border bg-card shadow-sm max-w-sm">
-        <CardContent className="p-4 flex flex-col gap-2">
+      {/* Configuration Settings Card */}
+      <Card className="border-border bg-card shadow-sm max-w-md">
+        <CardContent className="p-5 flex flex-col gap-4">
           <div>
-            <h3 className="text-sm font-bold text-foreground">Retained Limit Configuration</h3>
-            <p className="text-[11px] text-muted-foreground">Adjust the number of occupants to be retained (minimum: 47).</p>
+            <h3 className="text-base font-extrabold text-foreground">Evaluation Limits Configuration</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">Adjust the standing limits for occupant retention and waitlists.</p>
           </div>
-          <div className="flex items-center gap-2 mt-1">
-            <Input
-              type="number"
-              min={47}
-              className="h-9 w-28 bg-muted/20 border-border text-xs font-semibold"
-              value={inputValue}
-              onChange={(e) => {
-                const val = parseInt(e.target.value);
-                setInputValue(isNaN(val) ? 47 : val);
-              }}
-            />
-            <Button
-              size="sm"
-              className="h-9 font-bold text-xs px-4"
-              onClick={handleUpdateLimit}
-              disabled={isUpdating}
-            >
-              {isUpdating ? "Updating..." : "Update"}
-            </Button>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Retained Limit</label>
+              <Input
+                type="number"
+                min={47}
+                className="h-9 bg-muted/20 border-border text-xs font-semibold"
+                value={retainedInput}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value);
+                  setRetainedInput(isNaN(val) ? 47 : val);
+                }}
+              />
+              <span className="text-[9px] text-muted-foreground italic">minimum: 47 occupants</span>
+            </div>
+            
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Waitlisted Limit</label>
+              <Input
+                type="number"
+                min={0}
+                className="h-9 bg-muted/20 border-border text-xs font-semibold"
+                value={waitlistInput}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value);
+                  setWaitlistInput(isNaN(val) ? 0 : val);
+                }}
+              />
+              <span className="text-[9px] text-muted-foreground italic">minimum: 0 occupants</span>
+            </div>
           </div>
+
+          <Button
+            size="sm"
+            className="h-9 font-bold text-xs px-4 w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+            onClick={handleUpdateSettings}
+            disabled={isUpdating}
+          >
+            {isUpdating ? "Updating Configuration..." : "Save Configuration"}
+          </Button>
         </CardContent>
       </Card>
 
@@ -330,21 +362,21 @@ export function RecordsTable({ data, evaluations, initialRetainedLimit }: Record
                         {record.occupant.degree_program} - {record.occupant.year}
                       </td>
                       <td className="px-3 py-3 text-center font-medium text-foreground">
-                        {record.evaluator_points !== null && record.evaluator_points !== undefined ? `${record.evaluator_points} points` : '-'}
+                        {record.evaluator_points !== null && record.evaluator_points !== undefined ? `${formatDecimal(record.evaluator_points)} points` : '-'}
                       </td>
                       <td className="px-3 py-3 text-center font-medium text-foreground">
-                        {record.record_points !== null && record.record_points !== undefined ? `${record.record_points} points` : '-'}
+                        {record.record_points !== null && record.record_points !== undefined ? `${formatDecimal(record.record_points)} points` : '-'}
                       </td>
                       <td className="px-3 py-3 text-center font-bold text-foreground">
-                        {record.secondSemPoints !== null && record.secondSemPoints !== undefined ? `${record.secondSemPoints} points` : '-'}
+                        {record.secondSemPoints !== null && record.secondSemPoints !== undefined ? `${formatDecimal(record.secondSemPoints)} points` : '-'}
                       </td>
                       <td className={`px-3 py-3 text-center font-semibold ${record.firstSemPoints === null && record.finalScore !== null ? "italic text-muted-foreground/70" : "text-muted-foreground"}`}>
-                        {record.finalScore !== null && record.firstSemPoints === null ? 'N/A' : (record.firstSemPoints !== null && record.firstSemPoints !== undefined ? `${record.firstSemPoints} points` : '-')}
+                        {record.finalScore !== null && record.firstSemPoints === null ? 'N/A' : (record.firstSemPoints !== null && record.firstSemPoints !== undefined ? `${formatDecimal(record.firstSemPoints)} points` : '-')}
                       </td>
                       <td className="px-3 py-3 text-center">
                         {record.finalScore !== null && record.finalScore !== undefined ? (
                           <span className="rounded bg-primary/10 px-2 py-1 font-bold text-primary">
-                            {record.finalScore.toFixed(5)} points
+                            {record.finalScore.toFixed(4)} points
                           </span>
                         ) : '-'}
                       </td>

@@ -6,10 +6,10 @@ import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import OccupantNavbar from "@/components/OccupantNavbar";
 import { getEvaluationsByOccupantId } from "@/lib/evaluation-actions";
-import { getRetainedLimit } from "@/lib/settings-actions";
+import { getRetainedLimit, getWaitlistedLimit } from "@/lib/settings-actions";
 import { ArrowRight } from "lucide-react";
 import InteractiveLogo from "@/components/InteractiveLogo";
-import { cn } from "@/lib/utils";
+import { cn, formatDecimal } from "@/lib/utils";
 
 export default async function Home() {
   const profile = await getCurrentUserProfile();
@@ -20,13 +20,16 @@ export default async function Home() {
 
   let evaluations: any[] = [];
   let retainedLimit = 47;
+  let waitlistedLimit = 10;
   if (profile) {
-    const [evalData, limit] = await Promise.all([
+    const [evalData, limit, wLimit] = await Promise.all([
       getEvaluationsByOccupantId(profile.auth_user_id),
-      getRetainedLimit()
+      getRetainedLimit(),
+      getWaitlistedLimit()
     ]);
     evaluations = evalData;
     retainedLimit = limit;
+    waitlistedLimit = wLimit;
   }
 
   return (
@@ -64,7 +67,7 @@ export default async function Home() {
                     remark = "Failed";
                   } else if (rank <= retainedLimit) {
                     remark = "Retained";
-                  } else if (rank <= retainedLimit + 10) {
+                  } else if (rank <= retainedLimit + waitlistedLimit) {
                     remark = "Waitlisted";
                   } else {
                     remark = "Recommended";
@@ -100,7 +103,7 @@ export default async function Home() {
                           remark === 'Recommended' && 'text-blue-500 dark:text-blue-400',
                           remark === 'Failed' && 'text-destructive'
                         )}>
-                          {finalScore.toFixed(5)}
+                          {finalScore.toFixed(4)}
                         </span>
                         <span className="text-xs md:text-sm font-bold text-muted-foreground uppercase tracking-wider mt-1">Final Score</span>
                       </div>
@@ -140,13 +143,13 @@ export default async function Home() {
                           
                           return (
                             <tr key={evaluation.id} className="transition-colors hover:bg-muted/50">
-                              <td className="px-4 md:px-6 py-3 md:py-4 text-center text-muted-foreground">{evaluation.evaluator_points ?? 0} points</td>
-                              <td className="px-4 md:px-6 py-3 md:py-4 text-center text-muted-foreground">{evaluation.record_points ?? 0} points</td>
-                              <td className="px-4 md:px-6 py-3 md:py-4 text-center font-bold text-foreground">{secondSem} points</td>
-                              <td className={`px-4 md:px-6 py-3 md:py-4 text-center ${isNA ? "italic text-muted-foreground" : "text-muted-foreground"}`}>{isNA ? "N/A" : `${firstSem} points`}</td>
+                              <td className="px-4 md:px-6 py-3 md:py-4 text-center text-muted-foreground">{formatDecimal(evaluation.evaluator_points ?? 0)} points</td>
+                              <td className="px-4 md:px-6 py-3 md:py-4 text-center text-muted-foreground">{formatDecimal(evaluation.record_points ?? 0)} points</td>
+                              <td className="px-4 md:px-6 py-3 md:py-4 text-center font-bold text-foreground">{formatDecimal(secondSem)} points</td>
+                              <td className={`px-4 md:px-6 py-3 md:py-4 text-center ${isNA ? "italic text-muted-foreground" : "text-muted-foreground"}`}>{isNA ? "N/A" : `${formatDecimal(firstSem)} points`}</td>
                               <td className="px-4 md:px-6 py-3 md:py-4 text-center">
                                 <span className={`inline-flex rounded-lg px-2.5 py-1 text-xs md:text-sm font-black ${finalScore >= 70 ? 'bg-primary/10 text-primary' : 'bg-destructive/10 text-destructive'}`}>
-                                  {finalScore.toFixed(5)} points
+                                  {finalScore.toFixed(4)} points
                                 </span>
                               </td>
                             </tr>
@@ -169,26 +172,26 @@ export default async function Home() {
                           <div className="flex items-center justify-between border-b pb-2">
                             <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Final Score</span>
                             <span className={`inline-flex rounded-lg px-3 py-1 text-sm font-black ${finalScore >= 70 ? 'bg-primary/10 text-primary' : 'bg-destructive/10 text-destructive'}`}>
-                              {finalScore.toFixed(5)} points
+                              {finalScore.toFixed(4)} points
                             </span>
                           </div>
                           
                           <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-xs">
                             <div>
                               <p className="text-muted-foreground font-medium">Evaluators (35 points)</p>
-                              <p className="font-semibold text-foreground mt-0.5">{evaluation.evaluator_points ?? 0} points</p>
+                              <p className="font-semibold text-foreground mt-0.5">{formatDecimal(evaluation.evaluator_points ?? 0)} points</p>
                             </div>
                             <div>
                               <p className="text-muted-foreground font-medium">Records (65 points)</p>
-                              <p className="font-semibold text-foreground mt-0.5">{evaluation.record_points ?? 0} points</p>
+                              <p className="font-semibold text-foreground mt-0.5">{formatDecimal(evaluation.record_points ?? 0)} points</p>
                             </div>
                             <div>
                               <p className="text-muted-foreground font-medium">2nd Sem (60%)</p>
-                              <p className="font-bold text-foreground mt-0.5">{secondSem} points</p>
+                              <p className="font-bold text-foreground mt-0.5">{formatDecimal(secondSem)} points</p>
                             </div>
                             <div>
                               <p className="text-muted-foreground font-medium">1st Sem (40%)</p>
-                              <p className={`font-semibold mt-0.5 ${isNA ? "italic text-muted-foreground" : "text-foreground"}`}>{isNA ? "N/A" : `${firstSem} points`}</p>
+                              <p className={`font-semibold mt-0.5 ${isNA ? "italic text-muted-foreground" : "text-foreground"}`}>{isNA ? "N/A" : `${formatDecimal(firstSem)} points`}</p>
                             </div>
                           </div>
                         </Card>

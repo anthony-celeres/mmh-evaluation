@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { addEvaluation } from "@/lib/evaluation-actions";
+import { formatDecimal } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
 
 type EvaluationFormProps = {
   occupantId: string;
@@ -22,6 +24,7 @@ type EvaluationFormProps = {
 export function EvaluationForm({ occupantId, occupantName, existingEvaluation, onSuccess }: EvaluationFormProps) {
   const [isEditing, setIsEditing] = useState(!existingEvaluation);
   const [isFirstSemNA, setIsFirstSemNA] = useState(existingEvaluation?.first_sem === "N/A");
+  const [isPending, startTransition] = useTransition();
 
   if (!isEditing && existingEvaluation) {
     return (
@@ -49,22 +52,22 @@ export function EvaluationForm({ occupantId, occupantName, existingEvaluation, o
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-1">
               <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Evaluator Points</Label>
-              <p className="text-sm font-bold text-foreground">{existingEvaluation.evaluator_points}</p>
+              <p className="text-sm font-bold text-foreground">{formatDecimal(existingEvaluation.evaluator_points)}</p>
             </div>
             <div className="grid gap-1">
               <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Record Points</Label>
-              <p className="text-sm font-bold text-foreground">{existingEvaluation.record_points}</p>
+              <p className="text-sm font-bold text-foreground">{formatDecimal(existingEvaluation.record_points)}</p>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-1">
               <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">1st Sem Points</Label>
-              <p className={`text-sm font-bold ${existingEvaluation.first_sem === "N/A" ? "text-muted-foreground italic" : "text-foreground"}`}>{existingEvaluation.first_sem === "N/A" ? "N/A (2nd Sem only)" : existingEvaluation.first_sem}</p>
+              <p className={`text-sm font-bold ${existingEvaluation.first_sem === "N/A" ? "text-muted-foreground italic" : "text-foreground"}`}>{existingEvaluation.first_sem === "N/A" ? "N/A (2nd Sem only)" : formatDecimal(existingEvaluation.first_sem)}</p>
             </div>
             <div className="grid gap-1">
               <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">2nd Sem Total</Label>
-              <p className="text-sm font-black text-primary">{existingEvaluation.second_sem}</p>
+              <p className="text-sm font-black text-primary">{formatDecimal(existingEvaluation.second_sem)}</p>
             </div>
           </div>
         </div>
@@ -73,10 +76,25 @@ export function EvaluationForm({ occupantId, occupantName, existingEvaluation, o
   }
 
   return (
-    <form action={async (formData) => {
-      await addEvaluation(formData);
-      setIsEditing(false);
-      if (onSuccess) onSuccess();
+    <form action={(formData) => {
+      startTransition(async () => {
+        try {
+          const startTime = Date.now();
+          await addEvaluation(formData);
+          
+          // Ensure a minimum delay of 600ms for a smooth animation transition
+          const elapsed = Date.now() - startTime;
+          const remaining = 600 - elapsed;
+          if (remaining > 0) {
+            await new Promise((resolve) => setTimeout(resolve, remaining));
+          }
+          
+          setIsEditing(false);
+          if (onSuccess) onSuccess();
+        } catch (err) {
+          console.error("Submission error:", err);
+        }
+      });
     }} className="space-y-4">
       <input type="hidden" name="occupant_id" value={occupantId} />
       
@@ -97,6 +115,7 @@ export function EvaluationForm({ occupantId, occupantName, existingEvaluation, o
           defaultValue={existingEvaluation?.evaluator_points}
           placeholder="e.g. 30"
           required
+          disabled={isPending}
         />
       </div>
 
@@ -112,6 +131,7 @@ export function EvaluationForm({ occupantId, occupantName, existingEvaluation, o
           defaultValue={existingEvaluation?.record_points}
           placeholder="e.g. 60"
           required
+          disabled={isPending}
         />
       </div>
 
@@ -123,7 +143,8 @@ export function EvaluationForm({ occupantId, occupantName, existingEvaluation, o
             id="first_sem_na"
             checked={isFirstSemNA}
             onChange={(e) => setIsFirstSemNA(e.target.checked)}
-            className="h-4 w-4 rounded border-border text-primary accent-primary cursor-pointer"
+            disabled={isPending}
+            className="h-4 w-4 rounded border-border text-primary accent-primary cursor-pointer disabled:opacity-50"
           />
           <Label htmlFor="first_sem_na" className="text-xs text-muted-foreground cursor-pointer">
             N/A — Occupant not available during 1st Semester
@@ -140,6 +161,7 @@ export function EvaluationForm({ occupantId, occupantName, existingEvaluation, o
             defaultValue={existingEvaluation?.first_sem === "N/A" ? "" : existingEvaluation?.first_sem}
             placeholder="e.g. 85"
             required
+            disabled={isPending}
           />
         )}
       </div>
@@ -151,12 +173,18 @@ export function EvaluationForm({ occupantId, occupantName, existingEvaluation, o
             variant="ghost" 
             onClick={() => setIsEditing(false)}
             className="flex-1"
+            disabled={isPending}
           >
             Cancel
           </Button>
         )}
-        <Button type="submit" className={`flex-1 ${existingEvaluation ? 'bg-accent hover:bg-accent/90 text-accent-foreground font-semibold' : 'bg-primary hover:bg-primary/90 text-primary-foreground font-semibold'}`}>
-          {existingEvaluation ? 'Update Evaluation' : 'Submit Evaluation'}
+        <Button 
+          type="submit" 
+          disabled={isPending}
+          className={`flex-1 ${existingEvaluation ? 'bg-accent hover:bg-accent/90 text-accent-foreground font-semibold' : 'bg-primary hover:bg-primary/90 text-primary-foreground font-semibold'}`}
+        >
+          {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {isPending ? (existingEvaluation ? 'Updating...' : 'Submitting...') : (existingEvaluation ? 'Update Evaluation' : 'Submit Evaluation')}
         </Button>
       </div>
     </form>

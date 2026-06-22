@@ -1,13 +1,14 @@
 import { getAllEvaluations } from "@/lib/evaluation-actions";
-import { getRetainedLimit } from "@/lib/settings-actions";
+import { getRetainedLimit, getWaitlistedLimit } from "@/lib/settings-actions";
 import { getAllProfiles } from "@/lib/admin";
 import { RecordsTable } from "@/components/admin/RecordsTable";
 
 export default async function AdminRecordsPage() {
-  const [profiles, evaluations, initialRetainedLimit] = await Promise.all([
+  const [profiles, evaluations, initialRetainedLimit, initialWaitlistedLimit] = await Promise.all([
     getAllProfiles(),
     getAllEvaluations(),
-    getRetainedLimit()
+    getRetainedLimit(),
+    getWaitlistedLimit()
   ]);
 
   // Filter out admin users
@@ -86,7 +87,7 @@ export default async function AdminRecordsPage() {
         </p>
       </section>
 
-      <RecordsTable data={finalData} evaluations={evaluations} initialRetainedLimit={initialRetainedLimit} />
+      <RecordsTable data={finalData} evaluations={evaluations} initialRetainedLimit={initialRetainedLimit} initialWaitlistedLimit={initialWaitlistedLimit} />
     </div>
   );
 }
